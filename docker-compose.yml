@@ -1,0 +1,75 @@
+
+version: '3'
+
+services:
+
+  hstream:
+    build:  .
+    image:  hstream
+  
+  influx:
+    image:    influxdb:1.3
+    hostname: influx
+    ports:
+      - 8086:8086
+    volumes:
+      - ./conf/influx/influxdb.conf:/etc/influxdb/influxdb.conf
+      - ./data/influx/data:/var/lib/influxdb/data
+      - ./data/influx/meta:/var/lib/influxdb/meta
+      - ./data/influx/wal:/var/lib/influxdb/wal
+      
+      
+  rabbit:
+    image:    rabbitmq:3-management
+    hostname: rabbit
+    ports:
+      - 15672:15672 
+      - 5672:5672
+    volumes:
+      - ./data/rabbit:/var/lib/rabbitmq       
+            
+            
+            
+  master:
+    image:    gettyimages/spark
+    command:  bin/spark-class org.apache.spark.deploy.master.Master -h master
+    hostname: master
+    environment:
+      MASTER: spark://master:7077
+      SPARK_CONF_DIR:   /conf
+      SPARK_PUBLIC_DNS: localhost
+    ports:
+      - 4040:4040
+      - 6066:6066
+      - 7077:7077
+      - 8080:8080
+    volumes:
+      - ./conf/spark/master:/conf
+      - ./data/spark:/tmp/data    
+        
+
+
+  worker:
+    image: gettyimages/spark
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
+    hostname: worker
+    environment:
+      SPARK_CONF_DIR: /conf
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_PORT: 8881
+      SPARK_WORKER_WEBUI_PORT: 8081
+      SPARK_PUBLIC_DNS: localhost
+    links:
+      - master
+    ports:
+      - 8081:8081
+    volumes:
+      - ./conf/spark/worker:/conf
+      - ./data/spark:/tmp/data    
+        
+
+networks:
+    default:
+        driver: bridge
+    
