@@ -26,7 +26,7 @@ Sends `/examples/spark-count.py` to `spark://master:7077` to count the number of
 
 #### Ex 2: Spark streaming
 
-Illustrates how to receive tweets and compute word frequencies in tweets in real-time.
+Illustrates how to receive tweets and compute word frequencies using spark.
 
 **Tweets producer (TCP server)**
 ```sh
