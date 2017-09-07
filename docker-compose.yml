@@ -6,6 +6,18 @@ services:
   hstream:
     build:  .
     image:  hstream
+    environment:
+      SPARK_CONF_DIR:   /conf
+    volumes:
+      - ./conf/spark/worker:/conf
+ 
+  rubybundle:
+    image:    ruby:2.1
+    command:  bundle install
+    working_dir: /scripts
+    volumes:
+      - ./scripts:/scripts
+      - ./data/ruby/bundle:/usr/local/bundle
   
   influx:
     image:    influxdb:1.3
